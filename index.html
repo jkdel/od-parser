@@ -11,17 +11,16 @@
 <body>
   <div class="cont" style="text-align: center; margin-top: 200px">
     <div class="dec">
-      <img src="lisa.png" alt="">
+      <img id="ls" src="" alt="">
     </div>
-    <div id="rates" style="text-align: center; font-family: sans-serif; margin: 10px 0">
-      <span style="vertical-align: sub">Layout:</span>
-      <input type="radio" id="r1" name="mode" value="MTS" style="vertical-align: middle" checked = "checked"><label for = "rd1" style="vertical-align: sub">MTS</label>
-      <input type="radio" id="r2" name="mode" value="Crystal Violet" style="vertical-align: middle" disabled><label for = "rd2" style="vertical-align: sub">Crystal Violet</label>
-    </div>
-    <input id="fl" type="file" onChange="readmultifiles" multiple="multiple"/>
+    <input type="file" onChange="readmultifiles" multiple="multiple"/>
   </div>
   <script>
-  var input = document.getElementById('fl');
+  var ims = ["lisa1.png","lisa2.png","lisa3.png","lisa4.png","lisa5.png"];
+  var im = ims[Math.floor(Math.random() * ims.length)];
+  document.getElementById('ls').src = im;
+
+  var input = document.querySelector('input');
   input.addEventListener('change', readmultifiles);
 
   function download(data, filename, type) {
@@ -49,7 +48,8 @@
   var nbfmt = lcfmt.format(".6f");
 
   function readmultifiles() {
-    csv = "File;Date;Time;Assay;Cell line;Passage;Incubation [h];Substance;Concentration [µM];OD1;OD2;OD.var;OD;Control;Ratio [%]\n";
+    csv = "File;Date;Time;Assay;Cell line;Passage;Incubation [h];Substance;"+
+          "Concentration [µM];OD1;OD2;OD.var;OD;Control;Ratio [%]\n";
     mode = document.querySelector('input[name="mode"]:checked').value;
     const files = this.files;
     Object.keys(files).forEach(i => {
@@ -67,12 +67,19 @@
         var cellline = fns[1];
         var passage = fns[2].split("p")[1];
         data = data.slice(16,24);
-        var control = d3.mean(data[6].slice(1,10).concat(data[7].slice(1,10)));
-        var cvar = d3.variance(data[6].slice(1,10).concat(data[7].slice(1,10)));
-        csv += fn+";"+date+";"+time+";"+assay+";"+cellline+";"+passage+";"+incubation+";"+"Medium"+";"+""+";"+""+";"+""+";"+nbfmt(cvar)+";"+nbfmt(control)+";"+nbfmt(control)+";"+nbfmt(control*100/control)+"\n";
-        var dmso = d3.mean(d3.transpose(data)[10].slice(0,4));
-        var dvar = d3.variance(d3.transpose(data)[10].slice(0,4));
-        csv += fn+";"+date+";"+time+";"+assay+";"+cellline+";"+passage+";"+incubation+";"+"DMSO"+";"+""+";"+""+";"+""+";"+nbfmt(dvar)+";"+nbfmt(dmso)+";"+nbfmt(control)+";"+nbfmt(dmso*100/control)+"\n";
+        var cvals = data[6].slice(1,10).concat(data[7].slice(1,10));
+        var control = d3.mean(cvals);
+        csv += fn+";"+date+";"+time+";"+assay+";"+cellline+";"+passage+";"+
+               incubation+";"+"Medium"+";"+""+";"+nbfmt(d3.min(cvals))+";"+
+               nbfmt(d3.max(cvals))+";"+nbfmt(d3.variance(cvals))+";"+
+               nbfmt(control)+";"+nbfmt(control)+";"+
+               nbfmt(control*100/control)+"\n";
+        var dvals = d3.transpose(data)[10].slice(0,4);
+        var dmso = d3.mean(dvals);
+        csv += fn+";"+date+";"+time+";"+assay+";"+cellline+";"+passage+";"+
+               incubation+";"+"DMSO"+";"+""+";"+nbfmt(d3.min(dvals))+";"+
+               nbfmt(d3.max(dvals))+";"+nbfmt(d3.variance(dvals))+";"+
+               nbfmt(dmso)+";"+nbfmt(control)+";"+nbfmt(dmso*100/control)+"\n";
         var rns = ["Betulinsäure","Disulfamat","Tris-Ester"];
         var cns = ["","1","2.5","5","10","20","40","60","80","100"];
         for (var j = 0; j < 3; j++) {
@@ -82,10 +89,15 @@
             var val2 =data[r+1].slice(k,k+1);
             var val = d3.mean(val1.concat(val2));
             var valv = d3.variance(val1.concat(val2));
-            csv += fn+";"+date+";"+time+";"+assay+";"+cellline+";"+passage+";"+incubation+";"+rns[j]+";"+nbfmt(cns[k])+";"+nbfmt(val1)+";"+nbfmt(val2)+";"+nbfmt(valv)+";"+nbfmt(val)+";"+nbfmt(control)+";"+nbfmt(val*100/control)+"\n";
+            csv += fn+";"+date+";"+time+";"+assay+";"+cellline+";"+passage+";"+
+                   incubation+";"+rns[j]+";"+nbfmt(cns[k])+";"+nbfmt(val1)+";"+
+                   nbfmt(val2)+";"+nbfmt(valv)+";"+nbfmt(val)+";"+
+                   nbfmt(control)+";"+nbfmt(val*100/control)+"\n";
           };
         };
-        if (file == files[files.length-1]) download(csv, "data.csv", "text/csv");
+        if (file == files[files.length-1]) {
+          download(csv, "data.csv", "text/csv");
+        }
       }
       reader.readAsBinaryString(file);
     })
