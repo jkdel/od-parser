@@ -49,7 +49,7 @@
   var nbfmt = lcfmt.format(".6f");
 
   function readmultifiles() {
-    csv = "File;Date;Time;Assay;Cell line;Passage;Incubation;Substance;Concentration [µM];OD;Control;Ratio [%]\n";
+    csv = "File;Date;Time;Assay;Cell line;Passage;Incubation [h];Substance;Concentration [µM];OD1;OD2;OD.var;OD;Control;Ratio [%]\n";
     mode = document.querySelector('input[name="mode"]:checked').value;
     const files = this.files;
     Object.keys(files).forEach(i => {
@@ -68,16 +68,21 @@
         var passage = fns[2].split("p")[1];
         data = data.slice(16,24);
         var control = d3.mean(data[6].slice(1,10).concat(data[7].slice(1,10)));
-        csv += fn+";"+date+";"+time+";"+assay+";"+cellline+";"+passage+";"+incubation+";"+"Medium"+";"+""+";"+nbfmt(control)+";"+nbfmt(control)+";"+nbfmt(control*100/control)+"\n";
+        var cvar = d3.variance(data[6].slice(1,10).concat(data[7].slice(1,10)));
+        csv += fn+";"+date+";"+time+";"+assay+";"+cellline+";"+passage+";"+incubation+";"+"Medium"+";"+""+";"+""+";"+""+";"+nbfmt(cvar)+";"+nbfmt(control)+";"+nbfmt(control)+";"+nbfmt(control*100/control)+"\n";
         var dmso = d3.mean(d3.transpose(data)[10].slice(0,4));
-        csv += fn+";"+date+";"+time+";"+assay+";"+cellline+";"+passage+";"+incubation+";"+"DMSO"+";"+""+";"+nbfmt(dmso)+";"+nbfmt(control)+";"+nbfmt(dmso*100/control)+"\n";
+        var dvar = d3.variance(d3.transpose(data)[10].slice(0,4));
+        csv += fn+";"+date+";"+time+";"+assay+";"+cellline+";"+passage+";"+incubation+";"+"DMSO"+";"+""+";"+""+";"+""+";"+nbfmt(dvar)+";"+nbfmt(dmso)+";"+nbfmt(control)+";"+nbfmt(dmso*100/control)+"\n";
         var rns = ["Betulinsäure","Disulfamat","Tris-Ester"];
         var cns = ["","1","2.5","5","10","20","40","60","80","100"];
         for (var j = 0; j < 3; j++) {
           r = j*2;
           for (var k = 1; k < 10; k++) {
-            var val = d3.mean(data[r].slice(k,k+1).concat(data[r+1].slice(k,k+1)));
-            csv += fn+";"+date+";"+time+";"+assay+";"+cellline+";"+passage+";"+incubation+";"+rns[j]+";"+nbfmt(cns[k])+";"+nbfmt(val)+";"+nbfmt(control)+";"+nbfmt(val*100/control)+"\n";
+            var val1 =data[r].slice(k,k+1);
+            var val2 =data[r+1].slice(k,k+1);
+            var val = d3.mean(val1.concat(val2));
+            var valv = d3.variance(val1.concat(val2));
+            csv += fn+";"+date+";"+time+";"+assay+";"+cellline+";"+passage+";"+incubation+";"+rns[j]+";"+nbfmt(cns[k])+";"+nbfmt(val1)+";"+nbfmt(val2)+";"+nbfmt(valv)+";"+nbfmt(val)+";"+nbfmt(control)+";"+nbfmt(val*100/control)+"\n";
           };
         };
         if (file == files[files.length-1]) download(csv, "data.csv", "text/csv");
