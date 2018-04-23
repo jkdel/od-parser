@@ -14,14 +14,14 @@
       <img src="lisa.png" alt="">
     </div>
     <div id="rates" style="text-align: center; font-family: sans-serif; margin: 10px 0">
-      <span style="vertical-align: sub">Mode:</span>
-      <input type="radio" id="r1" name="rate" value="MTS" style="vertical-align: middle" checked = "checked"><label for = "rd1" style="vertical-align: sub">MTS</label>
-      <input type="radio" id="r2" name="rate" value="Crystal Violet" style="vertical-align: middle" disabled><label for = "rd2" style="vertical-align: sub">Crystal Violet</label>
+      <span style="vertical-align: sub">Layout:</span>
+      <input type="radio" id="r1" name="mode" value="MTS" style="vertical-align: middle" checked = "checked"><label for = "rd1" style="vertical-align: sub">MTS</label>
+      <input type="radio" id="r2" name="mode" value="Crystal Violet" style="vertical-align: middle" disabled><label for = "rd2" style="vertical-align: sub">Crystal Violet</label>
     </div>
-    <input type="file" onChange="readmultifiles" multiple="multiple"/>
+    <input id="fl" type="file" onChange="readmultifiles" multiple="multiple"/>
   </div>
   <script>
-  var input = document.querySelector('input');
+  var input = document.getElementById('fl');
   input.addEventListener('change', readmultifiles);
 
   function download(data, filename, type) {
