@@ -50,7 +50,6 @@
   function readmultifiles() {
     csv = "File;Date;Time;Assay;Cell line;Passage;Incubation [h];Substance;"+
           "Concentration [µM];OD1;OD2;OD.var;OD;Control;Ratio [%]\n";
-    mode = document.querySelector('input[name="mode"]:checked').value;
     const files = this.files;
     Object.keys(files).forEach(i => {
       const file = files[i];
