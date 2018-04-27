@@ -84,7 +84,7 @@
     var vals = getGpVals(data,group);
     var ctrl = getGpVals(controls,group);
     var ctrlVal = d3.mean(getGpVals(data,ctrl[0]));
-    var stats = [d3.min(vals),d3.max(vals),Math.sqrt(d3.variance(vals))*100/d3.mean(vals),d3.mean(vals)];
+    var stats = [d3.min(vals),d3.max(vals),d3.variance(vals),d3.mean(vals)];
     stats.push(ctrlVal,stats[3]*100/ctrlVal);
     return apFmt(stats);
   }
@@ -101,8 +101,9 @@
 
   function readmultifiles() {
     csv = "File;Date;Time;Assay;Cell line;Passage;Incubation [h];Substance;"+
-          "Concentration [µM];OD1;OD2;OD.CV [%];OD;Control;Ratio [%]\n";
-    const files = this.files;
+          "Concentration [µM];OD1;OD2;OD.var;OD;Control;Ratio [%]\n";
+    files = this.files;
+    dfiles = [];
     Object.keys(files).forEach(i => {
       const file = files[i];
       const reader = new FileReader();
@@ -158,7 +159,9 @@
                     "\n"].join(";");
           };
         };
-        if (file == files[files.length-1]) {
+        dfiles.push(file.name);
+        // if (file == files[files.length-1]) {
+        if (files.length == dfiles.length) {
           download(csv, "data.csv", "text/csv");
         }
       }
