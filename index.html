@@ -57,6 +57,24 @@
               [ 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
               [ 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0]];
 
+  kv96Layout = [[ 0, 3, 4, 5, 6, 7, 8, 9,10,11, 2, 0, 0],
+                [ 0, 3, 4, 5, 6, 7, 8, 9,10,11, 2, 0, 0],
+                [ 0,12,13,14,15,16,17,18,19,20, 2, 0, 0],
+                [ 0,12,13,14,15,16,17,18,19,20, 2, 0, 0],
+                [ 0,21,22,23,24,25,26,27,28,29, 0, 0, 0],
+                [ 0,21,22,23,24,25,26,27,28,29, 0, 0, 0],
+                [ 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+                [ 0,30,30,30,30,30,30,30,30,30, 0, 0, 0]];
+
+  kv96Ctrls = [[ 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+               [ 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+               [ 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+               [ 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+               [ 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+               [ 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+               [ 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+               [ 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0]];
+
   kvLayout = [[ 0, 1, 9,10,11,12,13,14,15,16,17, 4, 0],
               [ 0, 1, 9,10,11,12,13,14,15,16,17, 4, 0],
               [ 0, 1,18,19,20,21,22,23,24,25,26, 6, 0],
@@ -115,7 +133,7 @@
         var time = data[3][2];
         var fns = fn.split(",");
         var assay = fns[0].split(" ")[0];
-        if (assay != "KV" & assay != "MTS") {
+        if (assay != "KV" & assay != "MTS" & assay != "KV96") {
           window.alert("Assay is neither KV nor MTS or syntax is invalid."+
                        "Using MTS layout, results might be wrong!");
         }
@@ -124,20 +142,29 @@
         var cellline = fns[1];
         var passage = fns[2].split("p")[1];
         data = data.slice(16,24);
+        var assayStr = assay;
         if (assay == "KV") {
           layout = kvLayout;
           controls = kvCtrls;
           var substance = incubation[0];
           incubation = [0,5,24,48];
+        } else if (assay == "KV96") {
+          layout = kv96Layout;
+          controls = kv96Ctrls;
+          assayStr = "KV";
         } else {
           layout = mtsLayout;
           controls = mtsCtrls;
         }
         for (var j = 0; j < incubation.length; j++) {
-          csv += [fn,date,time,assay,cellline,passage,incubation[j],"Medium","",
+          csv += [fn,date,time,assayStr,cellline,passage,incubation[j],"Medium","",
           getStat(j*2+1).join(";"),"\n"].join(";");
-          csv += [fn,date,time,assay,cellline,passage,incubation[j],"DMSO","",
+          csv += [fn,date,time,assayStr,cellline,passage,incubation[j],"DMSO","",
           getStat(j*2+2).join(";"),"\n"].join(";");
+        }
+        if (assay == "KV96") {
+          csv += [fn,date,time,assayStr,cellline,passage,"0","Medium","",
+          getStat(30).join(";"),"\n"].join(";");
         }
         var conc = ["","1","2,5","5","10","20","40","60","80","100"];
         if (assay == "KV") {
@@ -154,7 +181,7 @@
         };
         for (var j = 0; j < incubation.length; j++) {
           for (var k = ks; k < conc.length; k++) {
-            csv += [fn,date,time,assay,cellline,passage,incubation[j],
+            csv += [fn,date,time,assayStr,cellline,passage,incubation[j],
                     substance[j],conc[k],getStat(j*9+cor+k).join(";"),
                     "\n"].join(";");
           };
